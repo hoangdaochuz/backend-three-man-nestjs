@@ -10,6 +10,7 @@ import { RefreshJwtStrategy } from './strategies/refreshToken.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { FacebookStrategy } from './strategies/facebook.strategy';
 import { UsersService } from 'src/users/users.service';
+import { EmailConfirmationModule } from 'src/email-confirmation/email-confirmation.module';
 
 @Module({
   controllers: [AuthController],
@@ -22,6 +23,7 @@ import { UsersService } from 'src/users/users.service';
         expiresIn: '5m',
       },
     }),
+    EmailConfirmationModule,
   ],
   providers: [
     AuthService,

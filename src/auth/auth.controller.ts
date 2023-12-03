@@ -15,11 +15,15 @@ import { GoogleOAuthGuard } from './guards/google-oauth.guard';
 import { FacebbokGuard } from './guards/facebook.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { EmailConfirmationService } from 'src/email-confirmation/email-confirmation.service';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly emailConfirmService: EmailConfirmationService,
+  ) {}
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
@@ -28,7 +32,10 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() body: CreateUserDto) {
-    return this.authService.registerUser(body);
+    console.log('aaaa');
+    const user = await this.authService.registerUser(body);
+    await this.emailConfirmService.sendVerificationLink(user.email);
+    return user;
   }
 
   @UseGuards(RefreshJwtAuthGuard)

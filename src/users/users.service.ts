@@ -25,6 +25,7 @@ export class UsersService {
         ...createUserDto,
         email: formattedEmail,
         password: await hash(password, roundOfHash),
+        verified: false,
       },
     });
     await this.prisma.credentials.create({
@@ -183,7 +184,15 @@ export class UsersService {
     return newUser;
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    await this.prisma.credentials.delete({ where: { userId: id } });
     return this.prisma.user.delete({ where: { id } });
+  }
+
+  async markEmailAsConfirmed(userId: number) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { verified: true },
+    });
   }
 }
