@@ -1,11 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { Exclude } from 'class-transformer';
+import { CredentialEntity } from './credential.entity';
 
 export class UserEntity implements User {
   // remove these field which is unnecessary to show
-  constructor(partial: Partial<UserEntity>) {
-    Object.assign(this, partial);
+  constructor({ credential, ...data }: Partial<UserEntity>) {
+    Object.assign(this, data);
+    if (credential) {
+      this.credential = new CredentialEntity(credential);
+    }
   }
   @ApiProperty()
   id: number;
@@ -39,4 +43,7 @@ export class UserEntity implements User {
 
   @ApiProperty()
   verified: boolean;
+
+  @ApiProperty()
+  credential?: CredentialEntity;
 }

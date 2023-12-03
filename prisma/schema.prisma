@@ -22,4 +22,14 @@ model User{
   loginType String
   status Boolean
   verified Boolean
+  credential Credentials?
+}
+
+model Credentials{
+  id Int @id @default(autoincrement())
+  version Int
+  lastPassword String
+  passwordUpdatedAt DateTime
+  user User @relation(fields: [userId], references: [id])
+  userId Int @unique
 }
