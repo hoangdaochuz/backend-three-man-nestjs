@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
 import { GoogleOAuthGuard } from './guards/google-oauth.guard';
@@ -44,6 +44,10 @@ export class AuthController {
   @Post('resetPassword/request')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    description:
+      'Make a request for reset password. After this api complete, it will send a email with token. FE should write a page to handle this URL to get token here. Currently, I hard code "https://my-app.com/confirm-reset-password?token=....". Replace my-app.com by URL in FE. After get token successfully. Make a api resetPassword/do',
+  })
   async sendRequestResetPassword(
     @Body() resetPasswordDto: MakeRequestResetPasswordDto,
   ) {
@@ -53,6 +57,9 @@ export class AuthController {
   }
 
   @Post('resetPassword/do')
+  @ApiOperation({
+    description: 'Make a reset password',
+  })
   async doResetPassword(@Body() doResetPass: DoResetPasswordDto) {
     const email = await this.authService.decodeResetPassConfirmToken(
       doResetPass.token,
