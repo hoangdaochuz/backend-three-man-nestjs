@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { compare } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -60,5 +64,34 @@ export class AuthService {
       message: 'User information from google',
       user: req.user,
     };
+  }
+
+  async decodeResetPassConfirmToken(token: string) {
+    console.log('🚀 ~ f----> decodeResetPassConfirmToken ~ token:', token);
+    try {
+      const payload = await this.jwtService.verify(token, {
+        secret: `${process.env.JWT_RESET_PASSWORD_TOKEN_SECRET}`,
+      });
+      console.log('🚀 ---> ~ payload:', payload);
+
+      if (typeof payload === 'object' && 'email' in payload) {
+        return payload.email;
+      }
+      throw new BadRequestException();
+    } catch (e) {
+      console.error(e);
+      if (e?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Email confirmation token expired');
+      }
+      throw new BadRequestException('Bad confirmation token');
+    }
+  }
+
+  async doResetPassword(email: string, newPass: string) {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) throw new BadRequestException('User is not exist');
+    await this.userService.resetPasswordWithNewPassOfUser(user.id, {
+      password: newPass,
+    });
   }
 }

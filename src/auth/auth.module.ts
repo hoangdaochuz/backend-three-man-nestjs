@@ -20,7 +20,7 @@ import { EmailConfirmationModule } from 'src/email-confirmation/email-confirmati
     JwtModule.register({
       secret: `${process.env.JWT_SECRET}`,
       signOptions: {
-        expiresIn: '5m',
+        expiresIn: '6h',
       },
     }),
     EmailConfirmationModule,

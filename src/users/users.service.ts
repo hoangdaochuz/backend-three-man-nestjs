@@ -184,6 +184,22 @@ export class UsersService {
     return newUser;
   }
 
+  async resetPasswordWithNewPassOfUser(
+    id: number,
+    { password }: UpdateUserDto,
+  ) {
+    const newPassHash = await hash(password, roundOfHash);
+    const newUser = await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        password: newPassHash,
+      },
+    });
+    return newUser;
+  }
+
   async remove(id: number) {
     await this.prisma.credentials.delete({ where: { userId: id } });
     return this.prisma.user.delete({ where: { id } });

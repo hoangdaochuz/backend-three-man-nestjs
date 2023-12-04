@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
 import { GoogleOAuthGuard } from './guards/google-oauth.guard';
@@ -16,6 +16,9 @@ import { FacebbokGuard } from './guards/facebook.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { EmailConfirmationService } from 'src/email-confirmation/email-confirmation.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { MakeRequestResetPasswordDto } from './dto/make-request-reset-password.dto';
+import { DoResetPasswordDto } from './dto/do-reset-password.dto';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -36,6 +39,25 @@ export class AuthController {
     const user = await this.authService.registerUser(body);
     await this.emailConfirmService.sendVerificationLink(user.email);
     return user;
+  }
+
+  @Post('resetPassword/request')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async sendRequestResetPassword(
+    @Body() resetPasswordDto: MakeRequestResetPasswordDto,
+  ) {
+    await this.emailConfirmService.sendLinkResetPassword(
+      resetPasswordDto.email,
+    );
+  }
+
+  @Post('resetPassword/do')
+  async doResetPassword(@Body() doResetPass: DoResetPasswordDto) {
+    const email = await this.authService.decodeResetPassConfirmToken(
+      doResetPass.token,
+    );
+    await this.authService.doResetPassword(email, doResetPass.newPass);
   }
 
   @UseGuards(RefreshJwtAuthGuard)

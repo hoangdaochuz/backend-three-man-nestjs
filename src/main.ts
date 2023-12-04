@@ -20,6 +20,7 @@ async function bootstrap() {
   const { httpAdapter } = app.get(HttpAdapterHost);
   // app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
+  app.enableCors();
   await app.listen(8080); // run on port 8080
 }
 bootstrap();

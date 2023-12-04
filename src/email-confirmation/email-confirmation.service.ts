@@ -60,4 +60,20 @@ export class EmailConfirmationService {
       throw new BadRequestException('Bad confirmation token');
     }
   }
+  async sendLinkResetPassword(email: string) {
+    const user = await this.userService.findOneByEmail(email);
+    if (!user) throw new BadRequestException('User does not exist');
+    const payload = { email };
+    const resetPassToken = this.jwtService.sign(payload, {
+      secret: `${process.env.JWT_RESET_PASSWORD_TOKEN_SECRET}`,
+      expiresIn: `${process.env.JWT_RESET_PASSWORD_TOKEN_EXPIRATION_TIME}`,
+    });
+    const url = `${process.env.EMAIL_RESET_PASS_URL}?token=${resetPassToken}`;
+    const text = `Click here to change password: ${url}`;
+    return await this.emailService.sendMail({
+      to: email,
+      subject: 'Email reset password',
+      text,
+    });
+  }
 }
